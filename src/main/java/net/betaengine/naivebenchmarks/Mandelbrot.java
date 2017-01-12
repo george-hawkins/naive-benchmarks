@@ -15,7 +15,7 @@ public class Mandelbrot {
     }
     
     private static void draw() throws IOException {
-        int width = 1920, height = 1080, max = 8;
+        int width = 1920, height = 1920, max = 3;
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         int black = 0x000000, white = 0xFFFFFF;
 
@@ -25,14 +25,13 @@ public class Mandelbrot {
                 double c_im = (row - height/2)*4.0/width;
                 double x = 0, y = 0;
                 int iterations = 0;
-                while (x*x+y*y < 4 && iterations < max) {
+                while (x*x+y*y < 4 && iterations <= max) {
                     double x_new = x*x-y*y+c_re;
                     y = 2*x*y+c_im;
                     x = x_new;
                     iterations++;
                 } 
-                if (iterations < max) image.setRGB(col, row, white);
-                else image.setRGB(col, row, black);
+                image.setRGB(col, row, (iterations > max) ? white : black);
             }
         }
 
@@ -71,8 +70,8 @@ public class Mandelbrot {
     // Fairly obvious facts about the Mandelbrot set:
     // * All points within the set must fall within a circle of radius 2 centered on the origin.
     // * It's symmetric about the real axis.
-    // So if we ignore negative imaginary values we can work out (by experimentation) that if
-    // you do at least ITERATIONS_MIN iterations it is bounded by this rectangle defined by:
+    // So if we ignore negative imaginary values we can work out (by experimentation) that if you do
+    // least ITERATIONS_MIN iterations it is bounded by these values accurate to decimal places:
     private static double REAL_MIN = -2;
     private static double REAL_MAX = 0.47;
     private static double IM_MIN = 0;
@@ -95,14 +94,14 @@ public class Mandelbrot {
                 double c_im = (row - side/2)*4.0/side;
                 double x = 0, y = 0;
                 int iterations = 0;
-                while (x*x+y*y < 4 && iterations < max) {
+                while (x*x+y*y < 4 && iterations <= max) {
                     double x_new = x*x-y*y+c_re;
                     y = 2*x*y+c_im;
                     x = x_new;
                     iterations++;
                 }
                 
-                if (iterations >= max) {
+                if (iterations <= max) {
                     cRealMin = Math.min(cRealMin, c_re);
                     cRealMax = Math.max(cRealMax, c_re);
                     cImaginaryMax = Math.max(cImaginaryMax, c_im);
