@@ -38,50 +38,43 @@ public class Mandelbrot {
         ImageIO.write(image, "png", new File("mandelbrot.png"));
     }
 
-// 2, 0.47, 1.11
-// max = 8
-// real min = -1.9999
-// real max = 0.4757
-// i max = 1.1236
-// max = 50
-// real min = -1.9999
-// real max = 0.4707
- // i max = 1.1144
-
- // REAL_MIN, REAL_MAX, IM_MIN=0, IM_MAX
-// max = 52
-// real min = -1.9999
-// real max = 0.4707
-// i max = 1.1009 
-// max = 53
-// real min = -1.9999
-// real max = 0.4694
-// i max = 1.1009
-
-// max = 100
-// real min = -1.9999
-// real max = 0.4628
-// i max = 1.1009
-// max = 1000
-// real min = -1.9999
-// real max = 0.4617
-// i max = 1.1008
+    // How max affects apparent bounds:
+    //
+    // max = 8
+    // real min = -1.9999
+    // real max = 0.4735
+    // i max = 1.1231
+    //
+    // max = 51
+    // real min = -1.9999
+    // real max = 0.4707
+    // i max = 1.1009 
+    //    
+    // max = 52
+    // real min = -1.9999
+    // real max = 0.4694
+    // i max = 1.1009
+    //
+    // max = 1000
+    // real min = -1.9999
+    // real max = 0.4617
+    // i max = 1.1008
     
     // Fairly obvious facts about the Mandelbrot set:
     // * All points within the set must fall within a circle of radius 2 centered on the origin.
     // * It's symmetric about the real axis.
-    // So if we ignore negative imaginary values we can work out (by experimentation) that if you do
-    // least ITERATIONS_MIN iterations it is bounded by these values accurate to decimal places:
-    private static double REAL_MIN = -2;
+    // So if we ignore negative imaginary values we can work out (by experimentation) that if you do at
+    // least ITERATIONS_MIN iterations it is bounded by these values (see max and apparent bounds above):
+    private static double REAL_MIN = -2.00;
     private static double REAL_MAX = 0.47;
-    private static double IM_MIN = 0;
+    private static double IM_MIN = 0.00;
     private static double IM_MAX = 1.11;
     // If you do less than ITERATIONS_MIN you'll end up with points outside the above bounds.
-    private static int ITERATIONS_MIN = 53;
+    private static int ITERATIONS_MIN = 52;
     
     private static void bounds() {
         int side = 40000;
-        int max = 53;
+        int max = 1000;
         double cRealMin = Double.MAX_VALUE;
         double cRealMax = Double.MIN_VALUE;
         double cImaginaryMax = Double.MIN_VALUE;
@@ -101,7 +94,7 @@ public class Mandelbrot {
                     iterations++;
                 }
                 
-                if (iterations <= max) {
+                if (iterations > max) {
                     cRealMin = Math.min(cRealMin, c_re);
                     cRealMax = Math.max(cRealMax, c_re);
                     cImaginaryMax = Math.max(cImaginaryMax, c_im);
