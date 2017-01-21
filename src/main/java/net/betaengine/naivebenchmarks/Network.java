@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.LongBuffer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,12 +34,8 @@ public class Network extends AbstractBenchmark {
     public void run() {
         try {
             byte[] buffer = new byte[BUFFER_SIZE];
-            LongBuffer longBuffer = ByteBuffer.wrap(buffer).asLongBuffer();
-            XorShift64 rand = new XorShift64();
-
-            while (longBuffer.hasRemaining()) {
-                longBuffer.put(rand.next());
-            }
+            
+            randomFill(buffer);
             
             run((int)getLen(), buffer);
         } catch (IOException e) {

@@ -1,5 +1,8 @@
 package net.betaengine.naivebenchmarks;
 
+import java.nio.ByteBuffer;
+import java.nio.LongBuffer;
+
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,5 +52,18 @@ public abstract class AbstractBenchmark {
     
     private String summarize(DescriptiveStatistics stats) {
         return String.format("min=%dms, max=%dms, median=%dms, std-dev=%f", (int)stats.getMin(), (int)stats.getMax(), median(stats), stats.getStandardDeviation());
+    }
+    
+    protected void randomFill(LongBuffer longBuffer) {
+        XorShift64 rand = new XorShift64();
+
+        while (longBuffer.hasRemaining()) {
+            longBuffer.put(rand.next());
+        }
+    }
+    
+    // Fill memory with random values - useful to force the system to really allocate rather than just promise memory.
+    protected void randomFill(byte[] buffer) {
+        randomFill(ByteBuffer.wrap(buffer).asLongBuffer());
     }
 }

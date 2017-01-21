@@ -32,21 +32,38 @@ public class Benchmarks {
 
     
     private void run() {
-        Network network = new Network(CONFIG.getInt("network.cycles"), CONFIG.getInt("network.count"),
-                CONFIG.getString("network.server"), READ_PORT, WRITE_PORT);
+        if (CONFIG.getBoolean("processor.enabled")) {
+            logger.info("running processor benchmark");
+                
+            Processor processor = new Processor(CONFIG.getInt("processor.cycles"), CONFIG.getInt("processor.width"));
+            
+            processor.run();
+        }
         
-        network.run();
-        Processor processor = new Processor(CONFIG.getInt("processor.cycles"), CONFIG.getInt("processor.width"));
+        if (CONFIG.getBoolean("memory.enabled")) {
+            logger.info("running memory benchmark");
+                
+            Memory memory = new Memory(CONFIG.getInt("memory.cycles"), CONFIG.getBytes("memory.size"));
+            
+            memory.run();
+        }
         
-        processor.run();
+        if (CONFIG.getBoolean("disk.enabled")) {
+            logger.info("running disk benchmark");
+                
+            Disk disk = new Disk(CONFIG.getInt("disk.cycles"), CONFIG.getBytes("disk.size"));
+            
+            disk.run();
+        }
         
-        Disk disk = new Disk(CONFIG.getInt("disk.cycles"), CONFIG.getBytes("disk.size"));
-        
-        disk.run();
-        
-        Memory memory = new Memory(CONFIG.getInt("memory.cycles"), CONFIG.getBytes("memory.size"));
-        
-        memory.run();
+        if (CONFIG.getBoolean("network.enabled")) {
+            logger.info("running network benchmark");
+            
+            Network network = new Network(CONFIG.getInt("network.cycles"), CONFIG.getInt("network.count"),
+                    CONFIG.getString("network.server"), READ_PORT, WRITE_PORT);
+            
+            network.run();
+        }
         
         logger.info("finished");
     }

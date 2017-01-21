@@ -48,4 +48,46 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.5.0</version>
+                <executions>
+                    <execution>
+                        <id>benchmarks</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>net.betaengine.naivebenchmarks.Benchmarks</mainClass>
+                            <systemProperties>
+                                <systemProperty>
+                                    <key>config.file</key>
+                                    <value>benchmarks.conf</value>
+                                </systemProperty>
+                            </systemProperties>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>network-server</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>net.betaengine.naivebenchmarks.NetworkServer</mainClass>
+                            <systemProperties>
+                                <systemProperty>
+                                    <key>config.file</key>
+                                    <value>benchmarks.conf</value>
+                                </systemProperty>
+                            </systemProperties>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
