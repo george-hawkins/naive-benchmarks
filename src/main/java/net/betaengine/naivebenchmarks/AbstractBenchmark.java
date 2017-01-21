@@ -17,13 +17,11 @@ public abstract class AbstractBenchmark {
         this.len = len;
     }
     
-    protected int getCycles() { return cycles; }
-    
     protected long getLen() { return len; }
     
     public abstract void run();
     
-    protected void measure(String name, int cycles, Runnable job) {
+    protected void measure(String name, Runnable job) {
         DescriptiveStatistics stats = new DescriptiveStatistics();
         
         for (int i = 0; i < cycles; i++) {

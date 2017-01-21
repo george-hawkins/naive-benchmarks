@@ -28,10 +28,10 @@ public class Disk extends AbstractBenchmark {
         String filename = UUID.randomUUID().toString() + ".tmp";
         File file = new File(filename);
         long steps = getLen() / BUFFER_SIZE;
-        long len = steps * BUFFER_SIZE;
+        long len = steps * BUFFER_SIZE; // len is definitely a multiple of BUFFER_SIZE, unlike getLen() value.
 
         // If `len` is low then the first write is noticeably quicker than the subsequent ones (presumably for some OS related reason).
-        measure("file write", getCycles(), () -> {
+        measure("file write", () -> {
             try {
                 long total = 0;
                 FileOutputStream output = new FileOutputStream(file);
@@ -49,7 +49,7 @@ public class Disk extends AbstractBenchmark {
         });
         
         // If `len` is low then read is massively faster than write - presumably because the OS has what was just written in cache.
-        measure("file read", getCycles(), () -> {
+        measure("file read", () -> {
             try {
                 FileInputStream input = new FileInputStream(file);
                 long total = 0;

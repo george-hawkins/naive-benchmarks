@@ -28,9 +28,12 @@ public class Benchmarks {
 
     
     private void run() {
-        Disk disk = new Disk(config.getInt("disk.cycles"), config.getBytes("disk.size"));
+        Processor processor = new Processor(config.getInt("processor.cycles"), config.getInt("processor.width"));
         
-        disk.run();
+        processor.run();
+//        Disk disk = new Disk(config.getInt("disk.cycles"), config.getBytes("disk.size"));
+//        
+//        disk.run();
 //        
 //        Memory memory = new Memory(config.getInt("memory.cycles"), config.getBytes("memory.size"));
 //        

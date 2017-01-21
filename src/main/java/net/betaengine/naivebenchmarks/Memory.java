@@ -22,13 +22,13 @@ public class Memory extends AbstractBenchmark {
         
         long[] buffer = new long[bufferSize];
         
-        measure("memory read", getCycles(), () -> {
+        measure("memory read", () -> {
             for (int offset = 0; offset < memory.length; offset += buffer.length) {
                 System.arraycopy(memory, offset, buffer, 0, buffer.length);
             }
         });
         
-        measure("memory write", getCycles(), () -> {
+        measure("memory write", () -> {
             for (int offset = 0; offset < memory.length; offset += buffer.length) {
                 System.arraycopy(buffer, 0, memory, offset, buffer.length);
             }
