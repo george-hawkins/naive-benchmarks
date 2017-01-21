@@ -34,6 +34,8 @@ public class Processor extends AbstractBenchmark {
                 fatal(e);
             }
         });
+        
+        service.shutdown();
     }
     
     private double getWork(Future<Double> future) {

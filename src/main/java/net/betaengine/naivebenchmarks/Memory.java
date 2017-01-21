@@ -38,7 +38,7 @@ public class Memory extends AbstractBenchmark {
     private int normalize(long len, int bufferSize) {
         len /= Long.BYTES; // Convert to 8-byte words.
         
-        // Use integer division to convert to a multiple of BUFFER_SIZE.
+        // Make len a multiple of BUFFER_SIZE.
         len /= bufferSize;
         len *= bufferSize;
         

@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractBenchmark {
     private final Logger logger = LoggerFactory.getLogger(AbstractBenchmark.class);
     
-    protected final static int BUFFER_SIZE = 8192 / Long.BYTES; // Same as used by BufferedWriter and similar classes.
+    protected final static int BUFFER_SIZE = 8192; // Same as used by BufferedWriter and similar classes.
     
     private final int cycles;
     private final long len;
@@ -21,7 +21,7 @@ public abstract class AbstractBenchmark {
     
     public abstract void run();
     
-    protected void measure(String name, Runnable job) {
+    protected int measure(String name, Runnable job) {
         DescriptiveStatistics stats = new DescriptiveStatistics();
         
         for (int i = 0; i < cycles; i++) {
@@ -34,6 +34,8 @@ public abstract class AbstractBenchmark {
         }
         
         logger.info("{} - {}", name, summarize(stats));
+        
+        return median(stats);
     }
     
     protected void fatal(Exception e) {
@@ -41,7 +43,11 @@ public abstract class AbstractBenchmark {
         System.exit(1);
     }
     
+    private int median(DescriptiveStatistics stats) {
+        return (int)stats.getPercentile(50);
+    }
+    
     private String summarize(DescriptiveStatistics stats) {
-        return String.format("min=%dms, max=%dms, median=%dms, std-dev=%f", (int)stats.getMin(), (int)stats.getMax(), (int)stats.getPercentile(50), stats.getStandardDeviation());
+        return String.format("min=%dms, max=%dms, median=%dms, std-dev=%f", (int)stats.getMin(), (int)stats.getMax(), median(stats), stats.getStandardDeviation());
     }
 }

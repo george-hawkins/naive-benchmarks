@@ -9,8 +9,12 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 public class Benchmarks {
+    public final static Config CONFIG = ConfigFactory.load(); // Specify file with -Dconfig.file=...
+    public final static int READ_PORT = CONFIG.getInt("network.read.port");
+    public final static int WRITE_PORT = CONFIG.getInt("network.write.port");
+    
+    
     private final Logger logger = LoggerFactory.getLogger(Benchmarks.class);
-    private final Config config = ConfigFactory.load(); // Specify file with -Dconfig.file=...
     
     private void showSystemInfo() {
         Runtime runtime = Runtime.getRuntime();
@@ -19,25 +23,30 @@ public class Benchmarks {
         long usedMemory = runtime.totalMemory() - runtime.freeMemory();
         long totalFreeMemory = runtime.maxMemory() - usedMemory;
         
-        logger.info("total free JVM memory - {}", HumanReadable.byteCount(totalFreeMemory, false));
+        logger.info("total free JVM memory - {}B", HumanReadable.toString(totalFreeMemory, false));
 
         for (File root : File.listRoots()) {
-            logger.info("file system \"{}\" has {} usable space", root.getAbsolutePath(), HumanReadable.byteCount(root.getUsableSpace(), false));
+            logger.info("file system \"{}\" has {}B usable space", root.getAbsolutePath(), HumanReadable.toString(root.getUsableSpace(), false));
         }
     }
 
     
     private void run() {
-        Processor processor = new Processor(config.getInt("processor.cycles"), config.getInt("processor.width"));
+        Network network = new Network(CONFIG.getInt("network.cycles"), CONFIG.getInt("network.count"),
+                CONFIG.getString("network.server"), READ_PORT, WRITE_PORT);
+        
+        network.run();
+        Processor processor = new Processor(CONFIG.getInt("processor.cycles"), CONFIG.getInt("processor.width"));
         
         processor.run();
-//        Disk disk = new Disk(config.getInt("disk.cycles"), config.getBytes("disk.size"));
-//        
-//        disk.run();
-//        
-//        Memory memory = new Memory(config.getInt("memory.cycles"), config.getBytes("memory.size"));
-//        
-//        memory.run();
+        
+        Disk disk = new Disk(CONFIG.getInt("disk.cycles"), CONFIG.getBytes("disk.size"));
+        
+        disk.run();
+        
+        Memory memory = new Memory(CONFIG.getInt("memory.cycles"), CONFIG.getBytes("memory.size"));
+        
+        memory.run();
         
         logger.info("finished");
     }

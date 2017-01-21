@@ -15,7 +15,7 @@ public class ImageMandlebrot extends AbstractMandelbrot {
     
     private final BufferedImage image;
     
-    public ImageMandlebrot() {
+    private ImageMandlebrot() {
         super(WIDTH, BOUNDS_REAL_MIN, BOUNDS_REAL_MAX, BOUNDS_IM_MIN, BOUNDS_IM_MAX, MAX_ITERATIONS);
         
         image = new BufferedImage(WIDTH, getHeight(), BufferedImage.TYPE_INT_RGB);
