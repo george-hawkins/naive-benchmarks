@@ -58,11 +58,11 @@ On Linux you can see how much memory is free like so:
     Mem:          16000       12589        2070         796        1341        2261
     Swap:          8143        2119        6024
 
-Here we see that 2070MiB are free.
+It's the `available` number (2261 here), rather than the `free`, number that's important.
 
 To give nearly all of this to the benchmarks set `MAVEN_OPTS` before running `mvn` like so:
 
-    $ export MAVEN_OPTS='-Xms1900m -Xmx1900m'
+    $ export MAVEN_OPTS='-Xms2200m -Xmx2200m'
 
 Use `-Xmx` to set the upper bound and use `-Xms` with the same value so that the benchmarks grab all this space immediately.
 
