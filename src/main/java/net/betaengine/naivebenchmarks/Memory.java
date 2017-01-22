@@ -1,5 +1,7 @@
 package net.betaengine.naivebenchmarks;
 
+import java.nio.LongBuffer;
+
 import com.google.common.base.Verify;
 
 public class Memory extends AbstractBenchmark {
@@ -13,12 +15,7 @@ public class Memory extends AbstractBenchmark {
         int len = normalize(getLen(), bufferSize);
         long[] memory = new long[len];
         
-        XorShift64 rand = new XorShift64();
-        
-        // Force the system to really allocate rather than just promise memory.
-        for (int i = 0; i < len; i++) {
-            memory[i] = rand.next();
-        }
+        randomFill(LongBuffer.wrap(memory));
         
         long[] buffer = new long[bufferSize];
         

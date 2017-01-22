@@ -13,7 +13,6 @@ public class Benchmarks {
     public final static int READ_PORT = CONFIG.getInt("network.read.port");
     public final static int WRITE_PORT = CONFIG.getInt("network.write.port");
     
-    
     private final Logger logger = LoggerFactory.getLogger(Benchmarks.class);
     
     private void showSystemInfo() {
@@ -29,9 +28,11 @@ public class Benchmarks {
             logger.info("file system \"{}\" has {}B usable space", root.getAbsolutePath(), HumanReadable.toString(root.getUsableSpace(), false));
         }
     }
-
     
     private void run() {
+        // It's a pity the config details aren't more specific.
+        logger.info("using config {}", CONFIG.origin());
+        
         if (CONFIG.getBoolean("processor.enabled")) {
             logger.info("running processor benchmark");
                 

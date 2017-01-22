@@ -4,12 +4,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.LongBuffer;
 import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Verify;
 
 public class Disk extends AbstractBenchmark {
-    private final static int OVERHEAD = 1024 * 1024; // 1MiB.
+    private final static int LONG_MB_64 = 64 * 1024 * 1024 / Long.BYTES; // Number of entries in a 64MiB array of longs.
+    
+    private final Logger logger = LoggerFactory.getLogger(Disk.class);
     
     public Disk(int cycles, long len) {
         super(cycles, len);
@@ -26,7 +32,7 @@ public class Disk extends AbstractBenchmark {
         long steps = getLen() / BUFFER_SIZE;
         long len = steps * BUFFER_SIZE; // len is definitely a multiple of BUFFER_SIZE, unlike getLen() value.
         
-        byte[] stolenMemory = stealFreeMemory();
+        long[] stolenMemory = stealFreeMemory();
 
         // If `len` is small then the first write is noticeably quicker than the subsequent ones (presumably for some OS related reason).
         measure("file write", () -> {
@@ -72,20 +78,37 @@ public class Disk extends AbstractBenchmark {
     
     // Ideally the benchmarks should be given nearly all the system's free memory using e.g. -Xms4g - this routine grabs all the memory
     // it can so that it's not available to the OS for the disk caching purposes that the OS can otherwise put free memory to use as.
-    private byte[] stealFreeMemory() {
+    private long[] stealFreeMemory() {
         Runtime runtime = Runtime.getRuntime();
         
         long usedMemory = runtime.totalMemory() - runtime.freeMemory();
         long totalFreeMemory = runtime.maxMemory() - usedMemory;
+
+        long len = totalFreeMemory;
         
-        long len = totalFreeMemory - OVERHEAD;
+        len /= Long.BYTES;
         
         // http://stackoverflow.com/a/8381338/245602
         Verify.verify(len < Integer.MAX_VALUE - 8);
         
-        byte[] memory = new byte[(int)len];
+        long[] memory = null;
+        long orig = len;
+
+        // For whatever reason it isn't always possible to even get close to allocating the apparent free memory, e.g. on the OptiPlex it was only
+        // possible to get 3.4GiB when apparently 4.8GiB were free (and -Xms/-Xmx were set correctly according to the available value shown by free).
+        // In other situations one gets all or nearly all the free memory.
+        do {
+            try {
+                memory = new long[(int)len];
+            } catch (OutOfMemoryError e) {
+                // Allocation attempts are surprisingly slow - we go down in 64MiB steps in order not to take forever.
+                len -= LONG_MB_64;
+            }
+        } while (memory == null);
         
-        randomFill(memory);
+        logger.info("was able to allocate {}B of {}B apparently free memory", HumanReadable.toString(len * Long.BYTES, false), HumanReadable.toString(orig * Long.BYTES, false));
+        
+        randomFill(LongBuffer.wrap(memory));
         
         return memory;
     }

@@ -11,6 +11,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+
+        <config.file>benchmarks.conf</config.file>
     </properties>
 
     <dependencies>
@@ -65,7 +67,7 @@
                             <systemProperties>
                                 <systemProperty>
                                     <key>config.file</key>
-                                    <value>benchmarks.conf</value>
+                                    <value>${config.file}</value>
                                 </systemProperty>
                             </systemProperties>
                         </configuration>
@@ -80,7 +82,7 @@
                             <systemProperties>
                                 <systemProperty>
                                     <key>config.file</key>
-                                    <value>benchmarks.conf</value>
+                                    <value>${config.file}</value>
                                 </systemProperty>
                             </systemProperties>
                         </configuration>
