@@ -35,7 +35,7 @@ public class Network extends AbstractBenchmark {
         try {
             byte[] buffer = new byte[BUFFER_SIZE];
             
-            randomFill(buffer);
+            XorShift64.randomFill(buffer);
             
             run((int)getLen(), buffer);
         } catch (IOException e) {

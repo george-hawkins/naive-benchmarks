@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.LongBuffer;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -13,8 +12,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Verify;
 
 public class Disk extends AbstractBenchmark {
-    private final static int LONG_MB_64 = 64 * 1024 * 1024 / Long.BYTES; // Number of entries in a 64MiB array of longs.
-    
     private final Logger logger = LoggerFactory.getLogger(Disk.class);
     
     public Disk(int cycles, long len) {
@@ -25,7 +22,7 @@ public class Disk extends AbstractBenchmark {
     public void run() {
         byte[] buffer = new byte[BUFFER_SIZE];
         
-        randomFill(buffer);
+        XorShift64.randomFill(buffer);
         
         String filename = UUID.randomUUID().toString() + ".tmp";
         File file = new File(filename);
@@ -76,40 +73,20 @@ public class Disk extends AbstractBenchmark {
         stolenMemory[0] = stolenMemory[1];
     }
     
-    // Ideally the benchmarks should be given nearly all the system's free memory using e.g. -Xms4g - this routine grabs all the memory
-    // it can so that it's not available to the OS for the disk caching purposes that the OS can otherwise put free memory to use as.
+    // Ideally the benchmarks should be given nearly all the system's free memory using e.g. -Xms4g
+    // This routine grabs all the memory it can so that it's not available to the OS for disk caching purposes.
     private long[] stealFreeMemory() {
         Runtime runtime = Runtime.getRuntime();
-        
         long usedMemory = runtime.totalMemory() - runtime.freeMemory();
         long totalFreeMemory = runtime.maxMemory() - usedMemory;
 
-        long len = totalFreeMemory;
+        // I used to use totalFreeMemory as an upper limit. However uncollected garbage and various other factors affect the numbers
+        // and depending on the situation one can often allocate more than the apparent total free memory or often allocate far less.
+        long[] result = MemoryHog.hog(runtime.maxMemory(), MemoryHog.ONE_MB);
         
-        len /= Long.BYTES;
+        // So the amount allocated may be greater than the amount that was apparently free.
+        logger.info("was able to allocate {}B of {}B apparently free memory", HumanReadable.toString((long) result.length * Long.BYTES, false), HumanReadable.toString(totalFreeMemory, false));
         
-        // http://stackoverflow.com/a/8381338/245602
-        Verify.verify(len < Integer.MAX_VALUE - 8);
-        
-        long[] memory = null;
-        long orig = len;
-
-        // For whatever reason it isn't always possible to even get close to allocating the apparent free memory, e.g. on the OptiPlex it was only
-        // possible to get 3.4GiB when apparently 4.8GiB were free (and -Xms/-Xmx were set correctly according to the available value shown by free).
-        // In other situations one gets all or nearly all the free memory.
-        do {
-            try {
-                memory = new long[(int)len];
-            } catch (OutOfMemoryError e) {
-                // Allocation attempts are surprisingly slow - we go down in 64MiB steps in order not to take forever.
-                len -= LONG_MB_64;
-            }
-        } while (memory == null);
-        
-        logger.info("was able to allocate {}B of {}B apparently free memory", HumanReadable.toString(len * Long.BYTES, false), HumanReadable.toString(orig * Long.BYTES, false));
-        
-        randomFill(LongBuffer.wrap(memory));
-        
-        return memory;
+        return result;
     }
 }

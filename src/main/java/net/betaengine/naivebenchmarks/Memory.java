@@ -1,21 +1,32 @@
 package net.betaengine.naivebenchmarks;
 
-import java.nio.LongBuffer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Verify;
 
 public class Memory extends AbstractBenchmark {
+    private final Logger logger = LoggerFactory.getLogger(Memory.class);
+
     public Memory(int cycles, long len) {
         super(cycles, len);
     }
     
     @Override
     public void run() {
+        if (getLen() != 0) {
+            runBenchmark();
+        } else {
+            suggestLen();
+        }
+    }
+    
+    private void runBenchmark() {
         int bufferSize = BUFFER_SIZE / Long.BYTES;
         int len = normalize(getLen(), bufferSize);
         long[] memory = new long[len];
         
-        randomFill(LongBuffer.wrap(memory));
+        XorShift64.randomFill(memory);
         
         long[] buffer = new long[bufferSize];
         
@@ -30,6 +41,13 @@ public class Memory extends AbstractBenchmark {
                 System.arraycopy(buffer, 0, memory, offset, buffer.length);
             }
         });
+    }
+    
+    private void suggestLen() {
+        long[] result = MemoryHog.hog(Runtime.getRuntime().maxMemory(), MemoryHog.ONE_MB);
+        
+        logger.info("set memory.size={}B in the conf file for repeatable results on this machine", HumanReadable.toString((long) result.length * Long.BYTES, false));
+        System.exit(0);
     }
     
     private int normalize(long len, int bufferSize) {
